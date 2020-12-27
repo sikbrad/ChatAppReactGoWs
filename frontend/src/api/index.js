@@ -1,14 +1,17 @@
 var socket = new WebSocket("ws://localhost:8080/ws");
 
-let connect = () => {
+let connect = (cb) => {
     console.log("Attempting connection");
 
     socket.onopen = () => {
-        console.log("Successfully connected")
+        console.log("Successfully connected");
     };
 
     socket.onmessage = (msg) => {
-        console.log(msg)
+        console.log(msg);
+
+        //trigger callback when you have new message coming
+        cb(msg);
     };
 
     socket.onclose = (event) => {
