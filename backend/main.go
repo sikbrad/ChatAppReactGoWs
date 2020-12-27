@@ -2,51 +2,31 @@ package main
 
 import (
 	"fmt"
-	"github.com/gorilla/websocket"
 	"log"
 	"net/http"
+	"github.com/sikbrad/ChatAppReactGoWs/pkg/websocket"
 )
 
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
-	CheckOrigin: func(r *http.Request) bool {
-		return true
-	},
-}
 
 //define websocket endpoint
 func serveWs(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("Host : %v\n", r.Host)
 
-	ws, err := upgrader.Upgrade(w, r, nil)
-
+	ws, err := websocket.Upgrade(w, r)
 	if err != nil {
 		log.Println(err)
 	}
 
 	//listen indefinitely
-	reader(ws)
+	//reader(ws)
+
+	// reader thing is relocated
+	go websocket.Writer(ws)
+	//read indefinitely?
+	websocket.Reader(ws)
+
 }
 
-func reader(conn *websocket.Conn) {
-	for {
-		//read
-		messageType, p, err := conn.ReadMessage()
-		if err != nil {
-			log.Println(err)
-			return
-		}
-
-		//print
-		fmt.Println(string(p))
-
-		if err := conn.WriteMessage(messageType, p); err != nil {
-			log.Println(err)
-			return
-		}
-	}
-}
 
 func main() {
 	fmt.Println("Chat app v0.0.1 started")
